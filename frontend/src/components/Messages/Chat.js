@@ -11,7 +11,8 @@ function Chat() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [socket, setSocket] = useState(null);
+  // socket variable was unused, commented for lint clean:
+  // const [socket, setSocket] = useState(null);
   const [otherUser, setOtherUser] = useState(null);
   const messagesEndRef = useRef(null);
 
@@ -25,7 +26,7 @@ function Chat() {
     }
     
     const newSocket = io('http://localhost:5000');
-    setSocket(newSocket);
+    // setSocket(newSocket); // This line was commented out in the original file
 
     newSocket.on('connect', () => {
       console.log('Socket connected, joining room:', user.id);
@@ -50,7 +51,8 @@ function Chat() {
     return () => {
       newSocket.close();
     };
-  }, [userId, user]);
+  // Add missing dependencies explicitly to satisfy exhaustive-deps lint:
+  }, [userId, user, loadMessages, loadOtherUser]);
 
   useEffect(() => {
     scrollToBottom();

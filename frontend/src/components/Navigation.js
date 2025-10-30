@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 
 function Navigation() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth(); // user was unused, commented for lint clean
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
