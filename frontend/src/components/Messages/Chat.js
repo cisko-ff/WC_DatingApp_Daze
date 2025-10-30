@@ -17,16 +17,38 @@ function Chat() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    // move loadMessages and loadOtherUser inside the effect so lint is satisfied
+    const loadMessages = async () => {
+      try {
+        const response = await api.get(`/messages/${userId}`);
+        setMessages(response.data);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    };
+
+    const loadOtherUser = async () => {
+      try {
+        const response = await api.get(`/users/matches`);
+        const match = response.data.find(m => m.user._id === userId);
+        if (match) {
+          setOtherUser(match.user);
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    };
+
     loadMessages();
     loadOtherUser();
-    
+
     if (!user || !user.id) {
       console.error('User not available');
       return;
     }
-    
+
     const newSocket = io('http://localhost:5000');
-    // setSocket(newSocket); // This line was commented out in the original file
+    setSocket(newSocket);
 
     newSocket.on('connect', () => {
       console.log('Socket connected, joining room:', user.id);
@@ -51,33 +73,13 @@ function Chat() {
     return () => {
       newSocket.close();
     };
-  // Add missing dependencies explicitly to satisfy exhaustive-deps lint:
-  }, [userId, user, loadMessages, loadOtherUser]);
+  }, [userId, user]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const loadMessages = async () => {
-    try {
-      const response = await api.get(`/messages/${userId}`);
-      setMessages(response.data);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  };
-
-  const loadOtherUser = async () => {
-    try {
-      const response = await api.get(`/users/matches`);
-      const match = response.data.find(m => m.user._id === userId);
-      if (match) {
-        setOtherUser(match.user);
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  };
+  // loadMessages and loadOtherUser now declared inside first useEffect to fix CI lint
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
