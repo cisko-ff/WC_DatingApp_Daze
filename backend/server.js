@@ -21,7 +21,7 @@ const io = socketIo(server, {
 });
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/dating-app';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://marasiganfrancis09_db_user:10CHh65BelY2S4rz@cluster0.emcat0y.mongodb.net/?appName=Cluster0';
 const path = require('path');
 
 // Middleware
