@@ -14,6 +14,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Ensure baseURL defaults correctly even if env is empty string
+    if (!config.baseURL || config.baseURL === '') {
+      config.baseURL = '/api';
+    }
     return config;
   },
   (error) => {

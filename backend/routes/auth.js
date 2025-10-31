@@ -15,15 +15,15 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, name, age, gender, preferredGender } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Create user
     const user = new User({
-      email,
+      email: normalizedEmail,
       password,
       name,
       age,
@@ -33,7 +33,6 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -47,7 +46,13 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error && error.code === 11000) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+    if (error && error.name === 'ValidationError') {
+      return res.status(400).json({ error: 'Invalid input data' });
+    }
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
@@ -56,19 +61,18 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
     const token = generateToken(user._id);
 
     res.json({
@@ -82,7 +86,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
